@@ -31,7 +31,8 @@
              [json :refer [wrap-json-body]]
              [keyword-params :refer [wrap-keyword-params]]
              [params :refer [wrap-params]]
-             [session :refer [wrap-session]]]
+             [session :refer [wrap-session]]
+             [ssl :as ring-ssl ]]
             [ring.util
              [io :as rui]
              [response :as rr]]
@@ -87,6 +88,9 @@
 (def ^:private app
   "The primary entry point to the Ring HTTP server."
   (-> #'routes/routes                    ; the #' is to allow tests to redefine endpoints
+      ring-ssl/wrap-hsts
+      ring-ssl/wrap-ssl-redirect
+      ring-ssl/wrap-forwarded-scheme
       (mb-middleware/log-api-call
        jetty-stats)
       mb-middleware/add-security-headers ; Add HTTP headers to API responses to prevent them from being cached
